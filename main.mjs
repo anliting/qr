@@ -1,3 +1,3 @@
 //import doe from'doe'
-import jsqr from'jsqr'
-console.log(jsqr)
+import jsQR from'jsQR'
+console.log(jsQR)

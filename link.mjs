@@ -14,10 +14,10 @@ async function link(input,file){
             :
                 null,
         },{
-            name:'jsqr',
-            resolveId:i=>i=='jsqr'?'jsqr':null,
-            load:i=>i=='jsqr'?
-                link(`${dir}/jsqr/src/index.ts`)
+            name:'jsQR',
+            resolveId:i=>i=='jsQR'?'jsQR':null,
+            load:i=>i=='jsQR'?
+                link(`${dir}/jsQR/src/index.ts`)
             :
                 null,
         }],
