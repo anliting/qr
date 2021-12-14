@@ -42,4 +42,8 @@ QrCodeScanner.prototype.end=function(){
     cancelAnimationFrame(this._frame);
 };
 
-export { QrCodeScanner as default };
+let qrCodeScanner=new QrCodeScanner('qrWorker.static.mjs')
+;(async()=>{
+    main.body(qrCodeScanner.node);
+    await qrCodeScanner.start();
+})();

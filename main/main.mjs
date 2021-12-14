@@ -1,35 +1,43 @@
 import doe from'doe'
-;(async()=>{
-    let mediaStream=await navigator.mediaDevices.getUserMedia(
-        {video:true}
-    ),video,canvas=doe.canvas(),qrWorker=new Worker('qrWorker.static.mjs')
-    doe.body(
-        video=doe.video({
-            srcObject:mediaStream,
-            onloadedmetadata:_=>{
-                canvas.width=video.videoWidth
-                canvas.height=video.videoHeight
-            },
-        }),
-    )
-    await video.play()
+function QrCodeScanner(workerPath){
+    this._worker=new Worker(workerPath)
+    this._worker.onmessage=e=>
+        this.onRead(e.data)
+    this._canvas=doe.canvas()
+    this._context=this._canvas.getContext('2d')
+    this.node=doe.video({
+        onloadedmetadata:_=>{
+            this._canvas.width=this.node.videoWidth
+            this._canvas.height=this.node.videoHeight
+        },
+    })
+    this._load=(async()=>{
+        this.node.srcObject=await navigator.mediaDevices.getUserMedia(
+            {video:true}
+        )
+    })()
+}
+QrCodeScanner.prototype.start=async function(){
+    await this._load
+    await this.node.play()
     let interval=1000,scanned=0,start=performance.now()
     let frame=()=>{
-        requestAnimationFrame(frame)
+        this._frame=requestAnimationFrame(frame)
         let t=performance.now()-start
-        let context=canvas.getContext('2d')
-        context.drawImage(video,0,0)
+        this._context.drawImage(this.node,0,0)
         if(interval*scanned<=t){
             scanned++
-            qrWorker.postMessage(
-                context.getImageData(
-                    0,0,canvas.width,canvas.height
+            console.log(scanned)
+            this._worker.postMessage(
+                this._context.getImageData(
+                    0,0,this._canvas.width,this._canvas.height
                 )
             )
         }
     }
-    requestAnimationFrame(frame)
-    qrWorker.onmessage=e=>{
-        console.log(e.data)
-    }
-})()
+    this._frame=requestAnimationFrame(frame)
+}
+QrCodeScanner.prototype.end=function(){
+    cancelAnimationFrame(this._frame)
+}
+export default QrCodeScanner
