@@ -1,1 +1,1 @@
-npm i fs-extra google-closure-compiler minify rollup @rollup/plugin-commonjs @rollup/plugin-typescript @types/fs-extra @types/jest @types/node
+npm i google-closure-compiler rollup
