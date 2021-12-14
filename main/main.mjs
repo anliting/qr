@@ -14,7 +14,7 @@ function QrCodeScanner(workerPath){
     })
     this._load=(async()=>{
         this.node.srcObject=await navigator.mediaDevices.getUserMedia(
-            {video:true}
+            {video:{facingMode:'environment'}}
         )
     })()
 }
