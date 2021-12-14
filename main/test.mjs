@@ -1,5 +1,4 @@
 import doe from'doe'
-//import QrCodeScanner from'./main.mjs'
 import QrCodeScanner from'../export/main.mjs'
 let qrCodeScanner=new QrCodeScanner('qrWorker.static.mjs')
 ;(async()=>{

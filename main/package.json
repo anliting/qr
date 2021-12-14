@@ -1,0 +1,8 @@
+{
+    "dependencies":{
+        "google-closure-compiler":"",
+        "rollup":"",
+        "terser":"",
+        "@anliting/core":"anliting/core"
+    }
+}
