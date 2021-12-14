@@ -8,7 +8,7 @@ async function link(input,file){
             name:'doe',
             resolveId:i=>i=='doe'?'doe':null,
             load:i=>i=='doe'?
-                link(`${dir}/../lib/doe/export/main.mjs`)
+                link(`${dir}/../lib/doe/main/main.mjs`)
             :
                 null,
         },{

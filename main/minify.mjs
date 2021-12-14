@@ -1,8 +1,9 @@
-import gcc from 'google-closure-compiler'
-export default()=>new Promise((rs,rj)=>
+import gcc from'google-closure-compiler'
+export default js=>new Promise((rs,rj)=>
     (new gcc.compiler({
-        js:'main.static.mjs',
         compilation_level:'ADVANCED',
+        chunk_output_type:'ES_MODULES',
+        js,
     })).run((exitCode,stdOut,stdErr)=>
         exitCode?rj(stdErr):rs(stdOut.replace('\n',''))
     )
