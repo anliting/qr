@@ -13,14 +13,11 @@ function QrCodeScanner(workerPath){
             this._canvas.height=this.node.videoHeight;
         },
     });
-    this._load=(async()=>{
-        this.node.srcObject=await navigator.mediaDevices.getUserMedia(
-            {video:{facingMode:'environment'}}
-        );
-    })();
 }
 QrCodeScanner.prototype.start=async function(){
-    await this._load;
+    this.node.srcObject=await navigator.mediaDevices.getUserMedia(
+        {video:{facingMode:'environment'}}
+    );
     await this.node.play();
     let count=0,frame=()=>{
         this._frame=requestAnimationFrame(frame);
