@@ -4,11 +4,15 @@ import link from'./link.mjs'
 import minify from'./minify.mjs'
 ;(async()=>{
     await fs.promises.writeFile(
-        'main.static.mjs',
-        await link('main.mjs')
+        'main/qrWorker.static.mjs',
+        await link('main/qrWorker.mjs')
     )
     await fs.promises.writeFile(
+        'main/main.static.mjs',
+        await link('main/main.mjs')
+    )
+    /*await fs.promises.writeFile(
         'main.static.min.mjs',
         await minify()
-    )
+    )*/
 })()

@@ -2906,5 +2906,8 @@ function jsQR(data, width, height, providedOptions = {}) {
 }
 jsQR.default = jsQR;
 
-//import doe from'doe'
-console.log(jsQR);
+onmessage=e=>{
+    let r=jsQR(e.data.data,e.data.width,e.data.height);
+    if(r)
+        postMessage(r.data);
+};

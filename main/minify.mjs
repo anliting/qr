@@ -4,6 +4,6 @@ export default()=>new Promise((rs,rj)=>
         js:'main.static.mjs',
         compilation_level:'ADVANCED',
     })).run((exitCode,stdOut,stdErr)=>
-        exitCode?rj(stdErr):rs(stdOut)
+        exitCode?rj(stdErr):rs(stdOut.replace('\n',''))
     )
 )

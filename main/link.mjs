@@ -8,14 +8,14 @@ async function link(input,file){
             name:'doe',
             resolveId:i=>i=='doe'?'doe':null,
             load:i=>i=='doe'?
-                link(`${dir}/doe/export/main.mjs`)
+                link(`${dir}/../lib/doe/export/main.mjs`)
             :
                 null,
         },{
             name:'jsQR',
             resolveId:i=>i=='jsQR'?'jsQR':null,
             load:i=>i=='jsQR'?
-                link(`${dir}/jsQR/dist/jsQR.js`)
+                link(`${dir}/../lib/jsQR/dist/jsQR.js`)
             :
                 null,
         }],

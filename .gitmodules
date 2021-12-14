@@ -1,0 +1,6 @@
+[submodule "lib/doe"]
+	path = lib/doe
+	url = git@github.com:anliting/doe.git
+[submodule "lib/jsQR"]
+	path = lib/jsQR
+	url = git@github.com:danimoh/jsQR
