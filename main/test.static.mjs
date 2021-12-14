@@ -6,4 +6,5 @@ let qrCodeScanner=new QrCodeScanner('qrWorker.static.mjs')
 ;(async()=>{
     main$1.body(qrCodeScanner.node);
     await qrCodeScanner.start();
+    qrCodeScanner.onRead=console.log;
 })();
