@@ -19,9 +19,10 @@ function QrCodeScanner(workerPath){
 QrCodeScanner.prototype.start=function(){
     return this._flow=(async()=>{
         await this._flow;
-        this.node.srcObject=await navigator.mediaDevices.getUserMedia(
-            {video:{facingMode:'environment'}}
-        );
+        this.node.srcObject=this._stream=
+            await navigator.mediaDevices.getUserMedia(
+                {video:{facingMode:'environment'}}
+            );
         await this.node.play();
         let count=0,frame=()=>{
             this._frame=requestAnimationFrame(frame);
@@ -40,7 +41,12 @@ QrCodeScanner.prototype.end=function(){
     return this._flow=(async()=>{
         await this._flow;
         cancelAnimationFrame(this._frame);
-        this.node.pause();
+        this._stream.getTracks().forEach(track=>{
+            track.stop();
+            this.node.srcObject.removeTrack(track);
+        });
+        //this.node.load()
+        //this.node.srcObject=0
     })()
 };
 
