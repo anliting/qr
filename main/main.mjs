@@ -13,24 +13,31 @@ function QrCodeScanner(workerPath){
         },
     })
 }
-QrCodeScanner.prototype.start=async function(){
-    this.node.srcObject=await navigator.mediaDevices.getUserMedia(
-        {video:{facingMode:'environment'}}
-    )
-    await this.node.play()
-    let count=0,frame=()=>{
-        this._frame=requestAnimationFrame(frame)
-        this._context.drawImage(this.node,0,0)
-        if(count++%skip==0)
-            this._worker.postMessage(
-                this._context.getImageData(
-                    0,0,this._canvas.width,this._canvas.height
+QrCodeScanner.prototype.start=function(){
+    return this._flow=(async()=>{
+        await this._flow
+        this.node.srcObject=await navigator.mediaDevices.getUserMedia(
+            {video:{facingMode:'environment'}}
+        )
+        await this.node.play()
+        let count=0,frame=()=>{
+            this._frame=requestAnimationFrame(frame)
+            this._context.drawImage(this.node,0,0)
+            if(count++%skip==0)
+                this._worker.postMessage(
+                    this._context.getImageData(
+                        0,0,this._canvas.width,this._canvas.height
+                    )
                 )
-            )
-    }
-    this._frame=requestAnimationFrame(frame)
+        }
+        this._frame=requestAnimationFrame(frame)
+    })()
 }
 QrCodeScanner.prototype.end=function(){
-    cancelAnimationFrame(this._frame)
+    return this._flow=(async()=>{
+        await this._flow
+        cancelAnimationFrame(this._frame)
+        this.node.pause()
+    })()
 }
 export default QrCodeScanner
