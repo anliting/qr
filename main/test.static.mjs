@@ -4,9 +4,6 @@ function doe(e){let t=0,n={function:t=>t(e),number:o,object:r,string:d};return c
 
 let skip=60;
 function QrCodeScanner(workerPath){
-    this._worker=new Worker(workerPath);
-    this._worker.onmessage=e=>
-        this.onRead(e.data);
     this._canvas=main.canvas();
     this._context=this._canvas.getContext('2d');
     this.node=main.video({
@@ -15,6 +12,25 @@ function QrCodeScanner(workerPath){
             this._canvas.height=this.node.videoHeight;
         },
     });
+    this._flow=(async()=>{
+        this._engine=
+            'BarcodeDetector' in self&&(
+                await BarcodeDetector.getSupportedFormats()
+            ).includes('qr_code')
+        ?
+            'barcodeDetector'
+        :
+            'jsQR';
+        if(this._engine=='barcodeDetector')
+            this._barcodeDetector=new BarcodeDetector({
+                formats:['qr_code']
+            });
+        else {
+            this._worker=new Worker(workerPath);
+            this._worker.onmessage=e=>
+                this.onRead(e.data);
+        }
+    })();
 }
 QrCodeScanner.prototype.start=function(){
     return this._flow=(async()=>{
@@ -24,15 +40,20 @@ QrCodeScanner.prototype.start=function(){
                 {video:{facingMode:'environment'}}
             );
         await this.node.play();
-        let count=0,frame=()=>{
+        let count=0,frame=async()=>{
             this._frame=requestAnimationFrame(frame);
             this._context.drawImage(this.node,0,0);
-            if(count++%skip==0)
-                this._worker.postMessage(
-                    this._context.getImageData(
-                        0,0,this._canvas.width,this._canvas.height
-                    )
+            if(count++%skip)
+                return
+            let imageData=this._context.getImageData(
+                0,0,this._canvas.width,this._canvas.height
+            );
+            if(this._engine=='barcodeDetector')
+                (await this._barcodeDetector.detect(imageData)).map(a=>
+                    this.onRead(a.rawData)
                 );
+            else
+                this._worker.postMessage(imageData);
         };
         this._frame=requestAnimationFrame(frame);
     })()
@@ -41,12 +62,10 @@ QrCodeScanner.prototype.end=function(){
     return this._flow=(async()=>{
         await this._flow;
         cancelAnimationFrame(this._frame);
-        this._stream.getTracks().forEach(track=>{
-            track.stop();
+        this._stream.getTracks().map(track=>{
             this.node.srcObject.removeTrack(track);
+            track.stop();
         });
-        //this.node.load()
-        //this.node.srcObject=0
     })()
 };
 
