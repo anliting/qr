@@ -50,7 +50,7 @@ QrCodeScanner.prototype.start=function(){
             );
             if(this._engine=='barcodeDetector')
                 (await this._barcodeDetector.detect(imageData)).map(a=>
-                    this.onRead(a.rawData)
+                    this.onRead(a.rawValue)
                 );
             else
                 this._worker.postMessage(imageData);
