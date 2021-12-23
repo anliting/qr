@@ -1,5 +1,5 @@
 import doe from'doe'
-let skip=60
+let skip=10
 function QrCodeScanner(workerPath){
     this._canvas=doe.canvas()
     this._context=this._canvas.getContext('2d')
@@ -38,7 +38,6 @@ QrCodeScanner.prototype.start=function(){
             )
         await this.node.play()
         let count=0,frame=async()=>{
-            this._frame=requestAnimationFrame(frame)
             this._context.drawImage(this.node,0,0)
             if(count++%skip)
                 return
@@ -51,6 +50,7 @@ QrCodeScanner.prototype.start=function(){
                 )
             else
                 this._worker.postMessage(imageData)
+            this._frame=requestAnimationFrame(frame)
         }
         this._frame=requestAnimationFrame(frame)
     })()
