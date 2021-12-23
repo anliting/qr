@@ -39,19 +39,22 @@ QrCodeScanner.prototype.start=function(){
             );
         await this.node.play();
         let count=0,frame=async()=>{
-            this._context.drawImage(this.node,0,0);
-            if(count++%skip)
-                return
-            let imageData=this._context.getImageData(
-                0,0,this._canvas.width,this._canvas.height
-            );
-            if(this._engine=='barcodeDetector')
-                (await this._barcodeDetector.detect(imageData)).map(a=>
-                    this.onRead(a.rawValue)
+            try{
+                this._context.drawImage(this.node,0,0);
+                if(count++%skip)
+                    return
+                let imageData=this._context.getImageData(
+                    0,0,this._canvas.width,this._canvas.height
                 );
-            else
-                this._worker.postMessage(imageData);
-            this._frame=requestAnimationFrame(frame);
+                if(this._engine=='barcodeDetector')
+                    (await this._barcodeDetector.detect(imageData)).map(a=>
+                        this.onRead(a.rawValue)
+                    );
+                else
+                    this._worker.postMessage(imageData);
+            }finally{
+                this._frame=requestAnimationFrame(frame);
+            }
         };
         this._frame=requestAnimationFrame(frame);
     })()
