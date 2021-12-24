@@ -29,41 +29,48 @@ function QrCodeScanner(workerPath){
         }
     })()
 }
-QrCodeScanner.prototype.start=function(){
-    return this._flow=(async()=>{
-        await this._flow
-        this.node.srcObject=
-            await navigator.mediaDevices.getUserMedia(
-                {video:{facingMode:'environment'}}
+QrCodeScanner.prototype.start=async function(){
+    let flow={}
+    this._startFlow=flow
+    await this._flow
+    if(flow.end)
+        return
+    flow.media=await navigator.mediaDevices.getUserMedia(
+        {video:{facingMode:'environment'}}
+    )
+    if(flow.end)
+        return
+    this.node.srcObject=flow.media
+    await this.node.play()
+    if(flow.end)
+        return
+    let count=0,frame=async()=>{
+        flow.frame=requestAnimationFrame(frame)
+        if(count++%skip)
+            return
+        this._context.drawImage(this.node,0,0)
+        let imageData=this._context.getImageData(
+            0,0,this._canvas.width,this._canvas.height
+        )
+        if(this._engine=='barcodeDetector')
+            (await this._barcodeDetector.detect(imageData)).map(a=>
+                this.onRead(a.rawValue)
             )
-        await this.node.play()
-        let count=0,frame=async()=>{
-            this._frame=requestAnimationFrame(frame)
-            if(count++%skip)
-                return
-            this._context.drawImage(this.node,0,0)
-            let imageData=this._context.getImageData(
-                0,0,this._canvas.width,this._canvas.height
-            )
-            if(this._engine=='barcodeDetector')
-                (await this._barcodeDetector.detect(imageData)).map(a=>
-                    this.onRead(a.rawValue)
-                )
-            else
-                this._worker.postMessage(imageData)
-        }
-        this._frame=requestAnimationFrame(frame)
-    })()
+        else
+            this._worker.postMessage(imageData)
+    }
+    flow.frame=requestAnimationFrame(frame)
 }
 QrCodeScanner.prototype.end=function(){
-    return this._flow=(async()=>{
-        await this._flow
-        cancelAnimationFrame(this._frame)
-        this.node.srcObject.getTracks().map(track=>{
-            this.node.srcObject.removeTrack(track)
+    this._startFlow.end=1
+    if('media'in this._startFlow)
+        this._startFlow.media.getTracks().map(track=>{
+            this._startFlow.media.removeTrack(track)
             track.stop()
         })
+    if(this.node.srcObject)
         this.node.srcObject=null
-    })()
+    if('frame'in this._startFlow)
+        cancelAnimationFrame(this._startFlow.frame)
 }
 export default QrCodeScanner
