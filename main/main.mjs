@@ -32,28 +32,25 @@ function QrCodeScanner(workerPath){
 QrCodeScanner.prototype.start=function(){
     return this._flow=(async()=>{
         await this._flow
-        this.node.srcObject=this._stream=
+        this.node.srcObject=
             await navigator.mediaDevices.getUserMedia(
                 {video:{facingMode:'environment'}}
             )
         await this.node.play()
         let count=0,frame=async()=>{
-            try{
-                this._context.drawImage(this.node,0,0)
-                if(count++%skip)
-                    return
-                let imageData=this._context.getImageData(
-                    0,0,this._canvas.width,this._canvas.height
+            this._frame=requestAnimationFrame(frame)
+            if(count++%skip)
+                return
+            this._context.drawImage(this.node,0,0)
+            let imageData=this._context.getImageData(
+                0,0,this._canvas.width,this._canvas.height
+            )
+            if(this._engine=='barcodeDetector')
+                (await this._barcodeDetector.detect(imageData)).map(a=>
+                    this.onRead(a.rawValue)
                 )
-                if(this._engine=='barcodeDetector')
-                    (await this._barcodeDetector.detect(imageData)).map(a=>
-                        this.onRead(a.rawValue)
-                    )
-                else
-                    this._worker.postMessage(imageData)
-            }finally{
-                this._frame=requestAnimationFrame(frame)
-            }
+            else
+                this._worker.postMessage(imageData)
         }
         this._frame=requestAnimationFrame(frame)
     })()
@@ -62,10 +59,11 @@ QrCodeScanner.prototype.end=function(){
     return this._flow=(async()=>{
         await this._flow
         cancelAnimationFrame(this._frame)
-        this._stream.getTracks().map(track=>{
+        this.node.srcObject.getTracks().map(track=>{
             this.node.srcObject.removeTrack(track)
             track.stop()
         })
+        this.node.srcObject=null
     })()
 }
 export default QrCodeScanner
