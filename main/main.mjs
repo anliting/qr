@@ -11,7 +11,7 @@ function QrCodeScanner(workerPath){
     })
     this._flow=(async()=>{
         this._engine=
-            'BarcodeDetector' in self&&(
+            'BarcodeDetector'in self&&(
                 await BarcodeDetector.getSupportedFormats()
             ).includes('qr_code')
         ?
