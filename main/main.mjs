@@ -32,16 +32,23 @@ function QrCodeScanner(workerPath){
 QrCodeScanner.prototype.start=async function(){
     let flow={}
     this._startFlow=flow
-    await this._flow
-    if(flow.end)
-        return
-    flow.media=await navigator.mediaDevices.getUserMedia(
-        {video:{facingMode:'environment'}}
-    )
+    await Promise.all([
+        this._flow,
+        flow.mediaFlow=(async()=>
+            flow.media=await navigator.mediaDevices.getUserMedia(
+                {video:{facingMode:'environment'}}
+            )
+        )()
+    ])
     if(flow.end)
         return
     this.node.srcObject=flow.media
-    await this.node.play()
+    try{
+        await this.node.play()
+    }catch(e){
+        if(!(e instanceof DOMException&&e.name=='AbortError'))
+            throw e
+    }
     if(flow.end)
         return
     let count=0,frame=async()=>{
@@ -62,15 +69,18 @@ QrCodeScanner.prototype.start=async function(){
     flow.frame=requestAnimationFrame(frame)
 }
 QrCodeScanner.prototype.end=function(){
-    this._startFlow.end=1
-    if('media'in this._startFlow)
-        this._startFlow.media.getTracks().map(track=>{
-            this._startFlow.media.removeTrack(track)
+    let flow=this._startFlow
+    flow.end=1
+    ;(async()=>{
+        await flow.mediaFlow
+        flow.media.getTracks().map(track=>{
+            flow.media.removeTrack(track)
             track.stop()
         })
+    })()
     if(this.node.srcObject)
         this.node.srcObject=null
-    if('frame'in this._startFlow)
-        cancelAnimationFrame(this._startFlow.frame)
+    if('frame'in flow)
+        cancelAnimationFrame(flow.frame)
 }
 export default QrCodeScanner
