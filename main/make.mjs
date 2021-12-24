@@ -2,26 +2,20 @@ import fs from'fs'
 import link from'./link.mjs'
 import minify from'./minify.mjs'
 ;(async()=>{
-    await fs.promises.writeFile(
-        'main/main.static.mjs',
-        await link('main/main.mjs')
-    )
-    await fs.promises.writeFile(
-        'main/qrWorker.static.mjs',
-        await link('main/qrWorker.mjs')
-    )
-    await fs.promises.writeFile(
-        'export/main.mjs',
-        await minify(
-            ''+await fs.promises.readFile('main/main.static.mjs')
-        )
-    )
-    await fs.promises.writeFile(
-        'export/qrWorker.mjs',
-        await minify(
-            ''+await fs.promises.readFile('main/qrWorker.static.mjs')
-        )
-    )
+    await Promise.all([
+        (async()=>
+            fs.promises.writeFile(
+                'export/main.mjs',
+                await link('main/main.mjs').then(minify)
+            )
+        )(),
+        (async()=>
+            fs.promises.writeFile(
+                'export/worker.mjs',
+                await link('main/worker.mjs').then(minify)
+            )
+        )(),
+    ])
     await fs.promises.writeFile(
         'main/test.static.mjs',
         await link('main/test.mjs')
