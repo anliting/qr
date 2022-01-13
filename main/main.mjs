@@ -30,23 +30,10 @@ export default class{
             }
         })()
     }
-    async start(){
-        let flow={}
+    async start(media){
+        let flow={media}
         this._startFlow=flow
-        await Promise.all([
-            this._flow,
-            flow.mediaFlow=(async()=>{
-                try{
-                    flow.media=await navigator.mediaDevices.getUserMedia(
-                        {video:{facingMode:'environment'}}
-                    )
-                }catch(e){
-                    console.log(e.name,e)
-                    //NotAllowedError
-                    throw e
-                }
-            })()
-        ])
+        await this._flow
         if(flow.end)
             return
         this.node.srcObject=flow.media
@@ -78,13 +65,10 @@ export default class{
     end(){
         let flow=this._startFlow
         flow.end=1
-        ;(async()=>{
-            await flow.mediaFlow
-            flow.media.getTracks().map(track=>{
-                flow.media.removeTrack(track)
-                track.stop()
-            })
-        })()
+        flow.media.getTracks().map(track=>{
+            flow.media.removeTrack(track)
+            track.stop()
+        })
         if(this.node.srcObject)
             this.node.srcObject=null
         if('frame'in flow)
