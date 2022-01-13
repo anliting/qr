@@ -3,16 +3,16 @@ import QrCodeScanner from'../export/main.mjs'
 let qrCodeScanner=new QrCodeScanner('../export/worker.mjs')
 ;(async()=>{
     doe.body(qrCodeScanner.node)
-    console.log(await navigator.mediaDevices.enumerateDevices())
     let media
     try{
         media=await navigator.mediaDevices.getUserMedia(
             {video:{facingMode:'environment'}}
         )
     }catch(e){
-        console.log(e.name,e)
-        // NotAllowedError NotFoundError
-        throw e
+        if(e.name=='NotAllowedError')
+            return alert('The camera is blocked. Please allow the use of your camera and refresh.')
+        if(e.name=='NotFoundError')
+            return alert('No camera is found. Please attach a camera to your device and refresh.')
     }
     await qrCodeScanner.start(media)
     qrCodeScanner.onRead=console.log

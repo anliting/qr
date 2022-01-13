@@ -5,16 +5,16 @@ function doe(e){let t=0,n={function:t=>t(e),number:a,object:o,string:i};return r
 let qrCodeScanner=new main('../export/worker.mjs')
 ;(async()=>{
     main$2.body(qrCodeScanner.node);
-    console.log(await navigator.mediaDevices.enumerateDevices());
     let media;
     try{
         media=await navigator.mediaDevices.getUserMedia(
             {video:{facingMode:'environment'}}
         );
     }catch(e){
-        console.log(e.name,e);
-        // NotAllowedError NotFoundError
-        throw e
+        if(e.name=='NotAllowedError')
+            return alert('The camera is blocked. Please allow the use of your camera and refresh.')
+        if(e.name=='NotFoundError')
+            return alert('No camera is found. Please attach a camera to your device and refresh.')
     }
     await qrCodeScanner.start(media);
     qrCodeScanner.onRead=console.log;
