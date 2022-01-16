@@ -26,7 +26,10 @@ export default class{
             else{
                 this._worker=new Worker(workerPath)
                 this._worker.onmessage=e=>
-                    this.onRead(e.data)
+                    e.data&&this.onRead(
+                        e.data.data,
+                        [this._engine,e.data]
+                    )
             }
         })()
     }
@@ -55,7 +58,7 @@ export default class{
             )
             if(this._engine=='barcodeDetector')
                 (await this._barcodeDetector.detect(imageData)).map(a=>
-                    this.onRead(a.rawValue)
+                    this.onRead(a.rawValue,[this._engine,a])
                 )
             else
                 this._worker.postMessage(imageData)
