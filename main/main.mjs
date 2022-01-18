@@ -65,6 +65,12 @@ export default class{
         }
         flow.frame=requestAnimationFrame(frame)
     }
+    async tryResume(){
+        if(this.node.paused){
+            alert('video is paused, resume after 4 seconds')
+            await this.node.play()
+        }
+    }
     end(){
         let flow=this._startFlow
         flow.end=1
