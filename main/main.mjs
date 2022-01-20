@@ -72,10 +72,6 @@ export default class{
     end(){
         let flow=this._startFlow
         flow.end=1
-        flow.media.getTracks().map(track=>{
-            flow.media.removeTrack(track)
-            track.stop()
-        })
         if(this.node.srcObject)
             this.node.srcObject=null
         if('frame'in flow)
