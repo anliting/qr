@@ -1,10 +1,11 @@
 import doe from'doe'
 import QrCodeScanner from'../export/main.mjs'
-let qrCodeScanner=new QrCodeScanner('../export/worker.mjs')
-qrCodeScanner=qrCodeScanner
+let qrCodeScanner=doe(new QrCodeScanner('../export/worker.mjs'),{
+    onError:console.error,
+    onRead:console.log,
+})
+doe.body(qrCodeScanner.node)
 ;(async()=>{
-    qrCodeScanner.onRead=console.log
-    doe.body(qrCodeScanner.node)
     let media
     try{
         media=await navigator.mediaDevices.getUserMedia(

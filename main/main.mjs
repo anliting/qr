@@ -9,12 +9,14 @@ export default class{
                 this._canvas.width=this.node.videoWidth
                 this._canvas.height=this.node.videoHeight
             },
+// Patch for iOS bug: Prevent iOS from making it fullscreen.
+            playsInline:true,
         })
         this._flow=(async()=>{
             this._engine=
                 'BarcodeDetector'in self&&(
                     await BarcodeDetector.getSupportedFormats()
-                ).includes('qr_code')
+                ).includes('qr_code')&&0
             ?
                 'barcodeDetector'
             :
@@ -23,14 +25,16 @@ export default class{
                 this._barcodeDetector=new BarcodeDetector({
                     formats:['qr_code']
                 })
-            else{
-                this._worker=new Worker(workerPath)
-                this._worker.onmessage=e=>
-                    e.data&&this.onRead(
-                        e.data.data,
-                        [this._engine,e.data]
-                    )
-            }
+            else
+                this._worker=doe(new Worker(workerPath),{
+                    onerror:e=>
+                        this.onError(e),
+                    onmessage:e=>
+                        e.data&&this.onRead(
+                            e.data.data,
+                            [this._engine,e.data]
+                        ),
+                })
         })()
     }
     async start(media){
